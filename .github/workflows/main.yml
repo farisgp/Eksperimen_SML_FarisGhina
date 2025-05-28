@@ -42,14 +42,14 @@ jobs:
           pip install mlflow
       
       # Run Preprocessing Script
-      # - name: Run preprocessing script
-      #   run: |
-      #     mkdir -p preprocessing/clothes_price_prediction_preprocessing
-      #     python preprocessing/automate_farisghina.py 
-      # Run as a mlflow project
-      - name: Run mlflow project
+      - name: Run preprocessing script
         run: |
-          mlflow run Project --env-manager=local 
+          mkdir -p preprocessing/clothes_price_prediction_preprocessing
+          python preprocessing/automate_farisghina.py 
+      # Run as a mlflow project
+      # - name: Run mlflow project
+      #   run: |
+      #     mlflow run Project --env-manager=local 
 
       # - name: Commit and push processed files
       #   env:

@@ -7,8 +7,24 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from itertools import product
 import random
 import numpy as np
+import dagshub
 
-mlflow.set_tracking_uri("https://dagshub.com/farisgp/Eksperimen_SML_FarisGhina.mlflow/")
+# Replace with your DagsHub username and repository name
+REPO_OWNER = "farisgp"  # Replace with your DagsHub username
+REPO_NAME = "Eksperimen_SML_FarisGhina"  # Replace with your repository name
+
+# Initialize DagsHub - This helps DagsHub track the experiment correctly
+dagshub.init(repo_owner=REPO_OWNER, repo_name=REPO_NAME)
+
+
+# mlflow.set_tracking_uri("http://127.0.0.1:5000/")  # Comment out local tracking URI
+
+# Set the tracking URI to your DagsHub repository
+mlflow.set_tracking_uri(f"https://dagshub.com/{REPO_OWNER}/{REPO_NAME}.mlflow/")
+
+print("Tracking URI:", mlflow.get_tracking_uri())
+# print("DAGSHUB_TOKEN set:", 'DAGSHUB_TOKEN' in os.environ)  # For debugging, can be commented out
+# print("Token Value:", os.environ.get("DAGSHUB_TOKEN")[:5], "...(disembunyikan)")  # For debugging, can be commented out
 
 # Create a new MLflow Experiment
 mlflow.set_experiment("Clothes Price Prediction")
@@ -35,7 +51,7 @@ param_grid = {
     'max_depth': [10, 20, 30]
 }
 
-# input_example = X_train[0:5]
+input_example = X_train[0:5]
 
 combinations = list(product(param_grid['n_estimators'], param_grid['max_depth']))
 

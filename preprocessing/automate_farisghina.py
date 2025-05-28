@@ -6,8 +6,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 import os
 
-def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", output_dir="preprocessing/clothes_price_prediction_preprocessing"):
-    os.makedirs(output_dir, exist_ok=True)
+def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", output_dir="preprocessing"):
 
     # Membaca dataset
     df = pd.read_csv(input_path)

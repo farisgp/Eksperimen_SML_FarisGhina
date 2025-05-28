@@ -44,7 +44,6 @@ jobs:
       # Run Preprocessing Script
       - name: Run preprocessing script
         run: |
-          mkdir -p preprocessing/clothes_price_prediction_preprocessing
           python preprocessing/automate_farisghina.py 
 
       - name: Commit and push processed files

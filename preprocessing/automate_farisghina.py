@@ -28,8 +28,8 @@ def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", 
     #Split data
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-    y_train = y_train.to_numpy()
-    y_test = y_test.to_numpy()
+    # y_train = y_train.to_numpy()
+    # y_test = y_test.to_numpy()
 
 
     # Simpan data hasil preprocessing
@@ -39,6 +39,7 @@ def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", 
     pd.DataFrame(y_test, columns=['Price']).to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
 
     print("Preprocessing selesai dan data disimpan di:", output_dir)
+    print(f"Jumlah data latih: {X_train.shape[0]}, data uji: {X_test.shape[0]}")
 
 if __name__ == "__main__":
     preprocess_data()

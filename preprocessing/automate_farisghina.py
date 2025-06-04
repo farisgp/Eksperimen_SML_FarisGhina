@@ -35,8 +35,8 @@ def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", 
     # Simpan data hasil preprocessing
     pd.DataFrame(X_train, columns=X.columns).to_csv(os.path.join(output_dir, 'X_train.csv'), index=False)
     pd.DataFrame(X_test, columns=X.columns).to_csv(os.path.join(output_dir, 'X_test.csv'), index=False)
-    pd.DataFrame(y_train, columns=['Price']).to_csv(os.path.join(output_dir, 'y_train.csv'), index=False)
-    pd.DataFrame(y_test, columns=['Price']).to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
+    pd.DataFrame(y_train.to_numpy(), columns=['Price']).to_csv(os.path.join(output_dir, 'y_train.csv'), index=False)
+    pd.DataFrame(y_test.to_numpy(), columns=['Price']).to_csv(os.path.join(output_dir, 'y_test.csv'), index=False)
 
     print("Preprocessing selesai dan data disimpan di:", output_dir)
     print(f"Jumlah data latih: {X_train.shape[0]}, data uji: {X_test.shape[0]}")

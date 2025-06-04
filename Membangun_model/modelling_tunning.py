@@ -1,9 +1,9 @@
 import mlflow
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, explained_variance_score
 from itertools import product
 import random
 import numpy as np
@@ -27,61 +27,56 @@ print("Tracking URI:", mlflow.get_tracking_uri())
 # print("Token Value:", os.environ.get("DAGSHUB_TOKEN")[:5], "...(disembunyikan)")  # For debugging, can be commented out
 
 # Create a new MLflow Experiment
-mlflow.set_experiment("Clothes Price Prediction")
+mlflow.set_experiment("Clothes Price Prediction Tunning")
 
-df = pd.read_csv("clothes_price_prediction_data.csv")
-
-# Encode fitur kategorikal
-label_encoders = {}
-for column in df.select_dtypes(include=['object']).columns:
-    le = LabelEncoder()
-    df[column] = le.fit_transform(df[column])
-
-X = df.drop("Price", axis=1)
-y = df["Price"]
-
-#Normalisasi Fitur
-scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
-
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+# --- Load Preprocessed Data
+X_train = pd.read_csv("../preprocessing/X_train.csv")
+X_test = pd.read_csv("../preprocessing/X_test.csv")
+y_train = pd.read_csv("../preprocessing/y_train.csv")
+y_test = pd.read_csv("../preprocessing/y_test.csv")
 
 param_grid = {
-    'n_estimators': [100, 200, 300],
-    'max_depth': [10, 20, 30]
+    'n_estimators': [100, 200],
+    'max_depth': [10, 15, 30]
 }
 
-input_example = X_train[0:5]
+# GridSearch dengan cross-validation
+grid_search = GridSearchCV(
+    estimator=RandomForestRegressor(random_state=42),
+    param_grid=param_grid,
+    cv=3,
+    scoring="neg_mean_squared_error",
+    n_jobs=1
+)
 
-combinations = list(product(param_grid['n_estimators'], param_grid['max_depth']))
+if __name__ == "__main__":
+    with mlflow.start_run():
+        # Fit model
+        grid_search.fit(X_train, y_train)
 
-for n_estimators, max_depth in combinations:
-    with mlflow.start_run(nested=True):
+        # Ambil model terbaik
+        best_model = grid_search.best_estimator_
+        best_params = grid_search.best_params_
 
-        
-        model = RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
-        model.fit(X_train, y_train)
+        # Prediksi
+        y_pred = best_model.predict(X_test)
 
-        y_pred = model.predict(X_test)
-
-        accuracy = model.score(X_test, y_test)
-        mse = mean_squared_error(y_test, y_pred)
+        # Evaluasi
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred))
         mae = mean_absolute_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
+        mse = mean_squared_error(y_test, y_pred)
+        evs = explained_variance_score(y_test, y_pred)
 
-        # Logging parameter
-        mlflow.log_param("n_estimators", n_estimators)
-        mlflow.log_param("max_depth", max_depth)
-
-        # Logging metrics
-        mlflow.log_metric("accuracy", accuracy)
-        mlflow.log_metric("mse", mse)
-        mlflow.log_metric("mae", mae)
-        mlflow.log_metric("r2_score", r2)
+        # Manual logging
+        mlflow.log_params(best_params)
+        mlflow.log_metric("RMSE", rmse)
+        mlflow.log_metric("MAE", mae)
+        mlflow.log_metric("R2", r2)
+        mlflow.log_metric("MSE", mse)
+        mlflow.log_metric("Explained_Variance", evs)
 
         # Logging model
-        mlflow.sklearn.log_model(
-            sk_model=model,
-            artifact_path="model",
-            input_example=input_example
-        )
+        mlflow.sklearn.log_model(best_model, "model", input_example=X_train.head())
+
+        print("Tuning selesai. Best params:", best_params)

@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score
 import random
 import numpy as np
 import os
@@ -28,34 +28,20 @@ print("Tracking URI:", mlflow.get_tracking_uri())
 mlflow.set_experiment("Clothes Price Prediction")
 
 # --- Load Preprocessed Data
-X_train = pd.read_csv("preprocessing/X_train.csv")
-X_test = pd.read_csv("preprocessing/X_test.csv")
-y_train = pd.read_csv("preprocessing/y_train.csv").values.ravel()
-y_test = pd.read_csv("preprocessing/y_test.csv").values.ravel()
+X_train = pd.read_csv("../preprocessing/X_train.csv")
+X_test = pd.read_csv("../preprocessing/X_test.csv")
+y_train = pd.read_csv("../preprocessing/y_train.csv")
+y_test = pd.read_csv("../preprocessing/y_test.csv")
 
 with mlflow.start_run():
-    # Parameter model
-    n_estimators = 200
-    max_depth = 15
+    mlflow.autolog()
+    # Log parameters
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train.values.ravel())
 
-    # Logging parameter manual
-    mlflow.log_param("n_estimators", n_estimators)
-    mlflow.log_param("max_depth", max_depth)
+    y_pred = model.predict(X_test)
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
 
-    model = RandomForestRegressor(n_estimators=n_estimators, max_depth=max_depth, random_state=42)
-    model.fit(X_train, y_train)
-
-    # Prediksi dan hitung metrik
-    preds = model.predict(X_test)
-
-    rmse = np.sqrt(mean_squared_error(y_test, preds))
-    mae = mean_absolute_error(y_test, preds)
-    r2 = r2_score(y_test, preds)
-
-    # Logging metrik manual
-    mlflow.log_metric("RMSE", rmse)
-    mlflow.log_metric("MAE", mae)
-    mlflow.log_metric("R2", r2)
-
-    # Logging model
-    mlflow.sklearn.log_model(model, "model", input_example=X_train.head())
+    print(f"MSE: {mse:.4f}")
+    print(f"R^2: {r2:.4f}")

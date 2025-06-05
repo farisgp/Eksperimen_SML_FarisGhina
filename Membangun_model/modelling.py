@@ -28,16 +28,20 @@ print("Tracking URI:", mlflow.get_tracking_uri())
 mlflow.set_experiment("Clothes Price Prediction")
 
 # --- Load Preprocessed Data
-X_train = pd.read_csv("../preprocessing/X_train.csv")
-X_test = pd.read_csv("../preprocessing/X_test.csv")
-y_train = pd.read_csv("../preprocessing/y_train.csv")
-y_test = pd.read_csv("../preprocessing/y_test.csv")
+df = pd.read_csv("../preprocessing/clothes_preprocessing.csv")
+
+# Pisahkan fitur dan target
+X = df.drop("Price", axis=1)
+y = df["Price"]
+
+# Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 with mlflow.start_run():
     mlflow.autolog()
     # Log parameters
     model = RandomForestRegressor(n_estimators=100, random_state=42)
-    model.fit(X_train, y_train.values.ravel())
+    model.fit(X_train, y_train)
 
     y_pred = model.predict(X_test)
     mse = mean_squared_error(y_test, y_pred)

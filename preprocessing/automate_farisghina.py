@@ -31,7 +31,7 @@ def preprocess_data(input_path="dataset_raw/clothes_price_prediction_data.csv", 
 
 
     # Simpan data hasil preprocessing
-    output_file = os.path.join(output_dir, "clothes_dataset_preprocessed.csv")
+    output_file = os.path.join(output_dir, "clothes_preprocessing.csv")
     df_preprocessed.to_csv(output_file, index=False)
 
     print("Preprocessing selesai dan data disimpan di:", output_dir)

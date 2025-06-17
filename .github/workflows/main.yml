@@ -52,6 +52,7 @@ jobs:
         run: |
           git config --global user.name ${{ secrets.username }}
           git config --global user.email ${{ secrets.email }}
+          git pull origin main --rebase
           git add preprocessing/clothes_preprocessing.csv
           git commit -m "Add preprocessing output"
           git push origin main
